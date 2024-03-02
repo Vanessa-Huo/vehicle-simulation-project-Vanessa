@@ -1,0 +1,11 @@
+#BlueJ class context
+comment0.target=Motorcycles
+comment0.text=\n\ The\ Motorcycles\ subclass\n
+comment1.params=origin
+comment1.target=Motorcycles(VehicleSpawner)
+comment2.params=
+comment2.target=void\ act()
+comment2.text=\n\ Act\ -\ do\ whatever\ the\ Motorcycles\ wants\ to\ do.\ This\ method\ is\ called\ whenever\n\ the\ 'Act'\ or\ 'Run'\ button\ gets\ pressed\ in\ the\ environment.\n
+comment3.params=
+comment3.target=boolean\ checkHitPedestrian()
+numComments=4

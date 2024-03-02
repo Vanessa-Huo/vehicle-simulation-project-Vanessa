@@ -29,6 +29,8 @@ public class VehicleWorld extends World
     public static Color YELLOW_LINE = new Color (255, 216, 0);
 
     public static boolean SHOW_SPAWNERS = true;
+    public static boolean SHOW_ENERGY_BARS = true;
+    public static boolean SHOW_MONEY_BARS = true;
     
     // Set Y Positions for Pedestrians to spawn
     public static final int TOP_SPAWN = 190; // Pedestrians who spawn on top
@@ -39,6 +41,10 @@ public class VehicleWorld extends World
     private int laneHeight, laneCount, spaceBetweenLanes;
     private int[] lanePositionsY;
     private VehicleSpawner[] laneSpawners;
+    
+    //Pedestrians constants 
+    public static final int P_Max_HP = 3000;
+    public static final int P_Max_Money = 3000;
 
     /**
      * Constructor for objects of class MyWorld.
@@ -63,21 +69,21 @@ public class VehicleWorld extends World
 
         // set up background -- If you change this, make 100% sure
         // that your chosen image is the same size as the World
-        background = new GreenfootImage ("background01.png");
+        background = new GreenfootImage ("city1.png");
         setBackground (background);
 
         // Set critical variables - will affect lane drawing
         laneCount = 8;
-        laneHeight = 48;
+        laneHeight = 57;
         spaceBetweenLanes = 6;
-        splitAtCenter = false;
-        twoWayTraffic = false;
+        splitAtCenter = true;
+        twoWayTraffic = true;
 
         // Init lane spawner objects 
         laneSpawners = new VehicleSpawner[laneCount];
 
         // Prepare lanes method - draws the lanes
-        lanePositionsY = prepareLanes (this, background, laneSpawners, 232, laneHeight, laneCount, spaceBetweenLanes, twoWayTraffic, splitAtCenter);
+        lanePositionsY = prepareLanes (this, background, laneSpawners, 240, laneHeight, laneCount, spaceBetweenLanes, twoWayTraffic, splitAtCenter);
 
         laneSpawners[0].setSpeedModifier(0.8);
         laneSpawners[3].setSpeedModifier(1.4);
@@ -95,13 +101,15 @@ public class VehicleWorld extends World
         if (Greenfoot.getRandomNumber (60) == 0){
             int lane = Greenfoot.getRandomNumber(laneCount);
             if (!laneSpawners[lane].isTouchingVehicle()){
-                int vehicleType = Greenfoot.getRandomNumber(3);
+                int vehicleType = Greenfoot.getRandomNumber(4);
                 if (vehicleType == 0){
                     addObject(new Car(laneSpawners[lane]), 0, 0);
                 } else if (vehicleType == 1){
-                    addObject(new Bus(laneSpawners[lane]), 0, 0);
+                    addObject(new Taxi(laneSpawners[lane]), 0, 0);
                 } else if (vehicleType == 2){
                     addObject(new Ambulance(laneSpawners[lane]), 0, 0);
+                } else if(vehicleType == 3){
+                    addObject(new Motorcycles(laneSpawners[lane]), 0, 0);
                 }
             }
         }

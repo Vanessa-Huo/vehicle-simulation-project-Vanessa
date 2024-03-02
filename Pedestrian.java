@@ -9,6 +9,13 @@ public class Pedestrian extends SuperSmoothMover
     private double maxSpeed;
     private int direction; // direction is always -1 or 1, for moving down or up, respectively
     private boolean awake, gettingUp;
+    
+    private SuperStatBar energyBar;
+    private int energy;
+    private int maxEnergy;
+    private SuperStatBar moneyBar;
+    private int money; 
+    
     public Pedestrian(int direction) {
         // choose a random speed
         maxSpeed = Math.random() * 2 + 1;
@@ -17,6 +24,32 @@ public class Pedestrian extends SuperSmoothMover
         awake = true;
         gettingUp = false;
         this.direction = direction;
+        maxEnergy = VehicleWorld.P_Max_HP;
+        energy = maxEnergy;
+        money = Greenfoot.getRandomNumber (2500)+500;
+        if(VehicleWorld.SHOW_ENERGY_BARS){
+            energyBar = new SuperStatBar(maxEnergy, energy, this, 40, 8, -32, Color.GREEN, Color.GRAY, false, Color.GRAY, 1);
+        }
+        if(VehicleWorld.SHOW_MONEY_BARS){
+            moneyBar = new SuperStatBar(3000, money, this, 40, 8, -40, Color.YELLOW, Color.GRAY, false, Color.GRAY, 1);
+        }
+    }
+    
+    public Pedestrian(){
+        maxSpeed = Math.random() * 2 + 1;
+        speed = maxSpeed;
+        // start as awake 
+        awake = true;
+        gettingUp = false;
+        this.direction = direction;
+        maxEnergy = VehicleWorld.P_Max_HP;
+        energy = maxEnergy;
+        if(VehicleWorld.SHOW_ENERGY_BARS){
+            energyBar = new SuperStatBar(maxEnergy, energy, this, 40, 8, -32, Color.GREEN, Color.GRAY, false, Color.GRAY, 1);
+        }
+        if(VehicleWorld.SHOW_MONEY_BARS){
+            moneyBar = new SuperStatBar(3000, money, this, 40, 8, -40, Color.YELLOW, Color.GRAY, false, Color.GRAY, 1);
+        }
     }
 
     /**
@@ -31,13 +64,14 @@ public class Pedestrian extends SuperSmoothMover
             if (getOneObjectAtOffset(0, (int)(direction * getImage().getHeight()/2 + (int)(direction * speed)), Vehicle.class) == null){
                 setLocation (getX(), getY() + (int)(speed*direction));
             }
-            if (direction == -1 && getY() < 100){
+            if (direction == -1 && getY() < 180){
                 getWorld().removeObject(this);
             } else if (direction == 1 && getY() > getWorld().getHeight() - 30){
                 getWorld().removeObject(this);
             }
 
         }
+    
     }
 
     /**
@@ -47,6 +81,20 @@ public class Pedestrian extends SuperSmoothMover
         speed = 0;
         setRotation (direction * 90);
         awake = false;
+    }
+    
+    public void addedToWorld (World w)
+    {
+        if (VehicleWorld.SHOW_ENERGY_BARS) 
+        {
+            w.addObject (energyBar, getX(), getY());
+            energyBar.update(energy);
+        }
+        if (VehicleWorld.SHOW_MONEY_BARS) 
+        {
+            w.addObject (moneyBar, getX(), getY());
+            moneyBar.update(money);
+        }
     }
 
     /**
