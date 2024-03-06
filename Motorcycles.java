@@ -6,18 +6,21 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 public class Motorcycles extends Vehicle
 {
     private GreenfootImage car;
+    private boolean rob;
+    
     
     public Motorcycles(VehicleSpawner origin){
         super (origin); // call the superclass' constructor first
+        followingDistance = 10;
         
         //Set up values for Motorcycles
-        maxSpeed = 4.5 + ((Math.random() * 10)/5);
+        maxSpeed = 4.0 + ((Math.random() * 10)/5);
         speed = maxSpeed;
         // because the Motorcycles graphic is tall, offset it a up (this may result in some collision check issues)
-        yOffset = 12;
-        
         car = getImage();
         car.scale((int)(car.getWidth()*5), (int)(car.getHeight()*5));
+        
+        yOffset = 12;
     }
 
     /**
@@ -31,6 +34,30 @@ public class Motorcycles extends Vehicle
 
     public boolean checkHitPedestrian () {
         // currently empty
+        Pedestrian p = (Pedestrian)getOneObjectAtOffset((int)speed + getImage().getWidth()/2, 0, Pedestrian.class);
+        if(p != null && p.isAwake() && p.isAlive() && p.getMoney()>0){
+            if(Greenfoot.getRandomNumber (2)==0){
+                p.steal();
+                rob = true;
+                p.getRobbed();
+            }
+            else if(Greenfoot.getRandomNumber (2)==1){
+                p.knockDown();
+                p.steal();
+                rob = true;
+                p.getRobbed();
+                return true;
+            }
+        }
+        else if(p != null && !p.isAwake()){
+            p.steal();
+            rob = true;
+        }
         return false;
     }
+    
+    public boolean robbed(){
+        return rob;
+    }
+
 }

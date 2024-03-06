@@ -132,7 +132,7 @@ public abstract class Vehicle extends SuperSmoothMover
                 double unitY = deltaY / length;
 
                 // Calculate the amount by which to push the nearby object
-                double pushAmount = minDistance - distance;
+                double pushAmount = minDistance - distance + 5;
 
                 // Update the position of the nearby object to push it away
                 object.setLocation(objectX, objectY + (int)(pushAmount * unitY));
@@ -146,23 +146,25 @@ public abstract class Vehicle extends SuperSmoothMover
      */
     public void drive() 
     {
-        // Ahead is a generic vehicle - we don't know what type BUT
+        // Ahead is a generic vehicle - we don't knockDownknow what type BUT
         // since every Vehicle "promises" to have a getSpeed() method,
         // we can call that on any vehicle to find out it's speed
-        Vehicle ahead = (Vehicle) getOneObjectAtOffset (direction * (int)(speed + getImage().getWidth()/2 + 6), 0, Vehicle.class);
+        Vehicle ahead = (Vehicle) getOneObjectAtOffset (direction * (int)(speed + getImage().getWidth()/2 + followingDistance), 0, Vehicle.class);
         double otherVehicleSpeed = -1;
-        if (ahead != null) {
-
+        if (ahead != null && ahead.isMoving()) {
             otherVehicleSpeed = ahead.getSpeed();
+        }
+        else if(ahead != null && !ahead.isMoving()){
+            otherVehicleSpeed = 0;
         }
 
         // Various things that may slow down driving speed 
         // You can ADD ELSE IF options to allow other 
         // factors to reduce driving speed.
 
-        if (otherVehicleSpeed > 0 && otherVehicleSpeed < maxSpeed){ // Vehicle ahead is slower?
+        if (otherVehicleSpeed >= 0 && otherVehicleSpeed < maxSpeed){ // Vehicle ahead is slower?
             speed = otherVehicleSpeed;
-        } else {
+        }else {
             speed = maxSpeed; // nothing impeding speed, so go max speed
         }
 
@@ -175,5 +177,9 @@ public abstract class Vehicle extends SuperSmoothMover
      */
     public double getSpeed(){
         return speed;
+    }
+    
+    public boolean isMoving(){
+        return moving;
     }
 }

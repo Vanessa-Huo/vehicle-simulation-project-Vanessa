@@ -59,6 +59,7 @@ public class VehicleWorld extends World
     {    
         // Create a new world with 600x400 cells with a cell size of 1x1 pixels.
         super(1024, 800, 1, false); 
+        Greenfoot.setSpeed(50);
 
         // This command (from Greenfoot World API) sets the order in which 
         // objects will be displayed. In this example, Pedestrians will
@@ -74,6 +75,7 @@ public class VehicleWorld extends World
 
         // Set critical variables - will affect lane drawing
         laneCount = 8;
+        //57+6=63
         laneHeight = 57;
         spaceBetweenLanes = 6;
         splitAtCenter = true;
@@ -83,12 +85,14 @@ public class VehicleWorld extends World
         laneSpawners = new VehicleSpawner[laneCount];
 
         // Prepare lanes method - draws the lanes
-        lanePositionsY = prepareLanes (this, background, laneSpawners, 240, laneHeight, laneCount, spaceBetweenLanes, twoWayTraffic, splitAtCenter);
+        lanePositionsY = prepareLanes (this, background, laneSpawners, 235, laneHeight, laneCount, spaceBetweenLanes, twoWayTraffic, splitAtCenter);
 
         laneSpawners[0].setSpeedModifier(0.8);
         laneSpawners[3].setSpeedModifier(1.4);
 
         setBackground (background);
+        
+        setPaintOrder(Vehicle.class);
     }
 
     public void act () {
@@ -101,27 +105,65 @@ public class VehicleWorld extends World
         if (Greenfoot.getRandomNumber (60) == 0){
             int lane = Greenfoot.getRandomNumber(laneCount);
             if (!laneSpawners[lane].isTouchingVehicle()){
-                int vehicleType = Greenfoot.getRandomNumber(4);
-                if (vehicleType == 0){
+                int vehicleType = Greenfoot.getRandomNumber(6);
+                if (vehicleType == 0 || vehicleType == 1 || vehicleType == 2){
                     addObject(new Car(laneSpawners[lane]), 0, 0);
-                } else if (vehicleType == 1){
+                } else if (vehicleType == 3){
                     addObject(new Taxi(laneSpawners[lane]), 0, 0);
-                } else if (vehicleType == 2){
+                } else if (vehicleType == 4){
                     addObject(new Ambulance(laneSpawners[lane]), 0, 0);
-                } else if(vehicleType == 3){
+                } else if(vehicleType == 5){
                     addObject(new Motorcycles(laneSpawners[lane]), 0, 0);
                 }
             }
         }
-
+        
+        if (getObjects(PoliceCar.class).size() == 0){
+            ArrayList<Motorcycles> cars = (ArrayList<Motorcycles>)getObjects(Motorcycles.class);
+            int x;
+            for (Motorcycles p : cars){
+                if (p.robbed() == true){
+                    x = getLane(p.getY()+12);
+                    //
+                    if (!laneSpawners[x].isTouchingVehicle()){
+                        addObject(new PoliceCar(laneSpawners[x]), 0, 0);
+                    }
+                }
+            }
+        }
+        
+        if (getObjects(Ambulance.class).size() == 0){
+            ArrayList<Pedestrian> peds = (ArrayList<Pedestrian>)getObjects(Pedestrian.class);
+            int count = 0;
+            for (Pedestrian p : peds){
+                // Check each one to see if awake, and if so....
+                if (p.isAwake() == false){
+                    count++; // ...add to our count.
+                }
+            }
+            // if the code above found at least 3 knocked-out Pedetrians
+            if (count == 3){
+                 // loop through all lanes and add an Ambulance to each, if the spawn area is clear
+                int lane1 = Greenfoot.getRandomNumber(laneCount);
+                int lane2 = Greenfoot.getRandomNumber(laneCount);
+                if (!laneSpawners[lane1].isTouchingVehicle()){
+                    addObject (new Ambulance(laneSpawners[lane1]),0,0);
+                }
+                if (!laneSpawners[lane2].isTouchingVehicle()){
+                    addObject (new Ambulance(laneSpawners[lane2]),0,0);
+                }
+                count = 0;
+            }
+        }
+            
         // Chance to spawn a Pedestrian
         if (Greenfoot.getRandomNumber (60) == 0){
-            int xSpawnLocation = Greenfoot.getRandomNumber (600) + 100; // random between 99 and 699, so not near edges
+            int xSpawnLocation = Greenfoot.getRandomNumber (600) + 150; // random between 99 and 699, so not near edges
             boolean spawnAtTop = Greenfoot.getRandomNumber(2) == 0 ? true : false;
             if (spawnAtTop){
-                addObject (new Pedestrian (1), xSpawnLocation, TOP_SPAWN);
+                addObject (new People (1), xSpawnLocation, TOP_SPAWN);
             } else {
-                addObject (new Pedestrian (-1), xSpawnLocation, BOTTOM_SPAWN);
+                addObject (new People (-1), xSpawnLocation, BOTTOM_SPAWN);
             }
         }
 

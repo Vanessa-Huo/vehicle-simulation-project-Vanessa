@@ -3,7 +3,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 /**
  * A Pedestrian that tries to walk across the street
  */
-public class Pedestrian extends SuperSmoothMover
+public abstract class Pedestrian extends SuperSmoothMover
 {
     private double speed;
     private double maxSpeed;
@@ -15,6 +15,7 @@ public class Pedestrian extends SuperSmoothMover
     private int maxEnergy;
     private SuperStatBar moneyBar;
     private int money; 
+    private boolean robbed;
     
     public Pedestrian(int direction) {
         // choose a random speed
@@ -26,7 +27,7 @@ public class Pedestrian extends SuperSmoothMover
         this.direction = direction;
         maxEnergy = VehicleWorld.P_Max_HP;
         energy = maxEnergy;
-        money = Greenfoot.getRandomNumber (2500)+500;
+        money = Greenfoot.getRandomNumber (3001);
         if(VehicleWorld.SHOW_ENERGY_BARS){
             energyBar = new SuperStatBar(maxEnergy, energy, this, 40, 8, -32, Color.GREEN, Color.GRAY, false, Color.GRAY, 1);
         }
@@ -80,6 +81,8 @@ public class Pedestrian extends SuperSmoothMover
     public void knockDown () {
         speed = 0;
         setRotation (direction * 90);
+        energy = energy - Greenfoot.getRandomNumber(energy+1);
+        energyBar.update(energy);
         awake = false;
     }
     
@@ -108,5 +111,43 @@ public class Pedestrian extends SuperSmoothMover
 
     public boolean isAwake () {
         return awake;
+    }
+    
+    public boolean isAlive(){
+        boolean check = false;
+        if(energy > 0){
+            check = true;
+        }
+        return check;
+    }
+    
+    public boolean canPay(){
+        boolean check = false;
+        if(money >= 500){
+            check = true;
+        }
+        return check;
+    }
+    
+    public void setEnergy(int x){
+        energy = x;
+    }
+    
+    public int getEnergy(){
+        return energy;
+    }
+    
+    public int getMoney(){
+        return money;
+    }
+    
+    public void steal(){
+        money = money - Greenfoot.getRandomNumber(money+1);
+        moneyBar.update(money);
+    }
+    
+    public boolean getRobbed(){
+        robbed = true;
+        return robbed;
     }
 }

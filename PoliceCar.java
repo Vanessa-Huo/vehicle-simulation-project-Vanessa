@@ -8,9 +8,10 @@ public class PoliceCar extends Vehicle
     private GreenfootImage car;
     public PoliceCar(VehicleSpawner origin){
         super (origin); // call the superclass' constructor first
+        followingDistance = 15;
         
         //Set up values for PoliceCar
-        maxSpeed = 3.5 + ((Math.random() * 10)/5);
+        maxSpeed = 4.5 + ((Math.random() * 10)/5);
         speed = maxSpeed;
         // because the PoliceCar graphic is tall, offset it a up (this may result in some collision check issues)
         yOffset = 15;
@@ -30,5 +31,9 @@ public class PoliceCar extends Vehicle
     public boolean checkHitPedestrian () {
         // currently empty
         return false;
+    }
+    
+    public void chase(){
+        
     }
 }
