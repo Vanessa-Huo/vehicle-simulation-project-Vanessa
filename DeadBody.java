@@ -3,7 +3,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 /**
  * Write a description of class DeadBody here.
  * 
- * @author (your name) 
+ * @author (Vanessa) 
  * @version (a version number or a date)
  */
 public class DeadBody extends Pedestrian
@@ -13,14 +13,16 @@ public class DeadBody extends Pedestrian
      * the 'Act' or 'Run' button gets pressed in the environment.
      */
     
+    
     public DeadBody ()
     {
+        //isPeople = false;
         this.getImage().setTransparency(250);
     }
     
     public void act()
     {
-        this.getImage().setTransparency(getImage().getTransparency() - 1);
+        this.getImage().setTransparency(getImage().getTransparency() - 3);
         if (this.getImage().getTransparency() < 5)
         {
             getWorld().removeObject(this);

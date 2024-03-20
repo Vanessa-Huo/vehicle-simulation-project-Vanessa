@@ -16,6 +16,9 @@ public abstract class Pedestrian extends SuperSmoothMover
     private SuperStatBar moneyBar;
     private int money; 
     private boolean robbed;
+    private int saveMeCount = 600;
+    
+    public boolean isPeople;
     
     public Pedestrian(int direction) {
         // choose a random speed
@@ -60,19 +63,30 @@ public abstract class Pedestrian extends SuperSmoothMover
     public void act()
     {
         // Awake is false if the Pedestrian is "knocked down"
-        if (awake){
+        if (awake && this.getWorld() != null){
             // Check in the direction I'm moving vertically for a Vehicle -- and only move if there is no Vehicle in front of me.
             if (getOneObjectAtOffset(0, (int)(direction * getImage().getHeight()/2 + (int)(direction * speed)), Vehicle.class) == null){
                 setLocation (getX(), getY() + (int)(speed*direction));
             }
             if (direction == -1 && getY() < 180){
                 getWorld().removeObject(this);
-            } else if (direction == 1 && getY() > getWorld().getHeight() - 30){
+            }else if (direction == 1 && getY() > getWorld().getHeight() - 30){
                 getWorld().removeObject(this);
             }
-
         }
+        
+        startCount();
+    }
     
+    public void startCount(){
+        if(!isAwake() && this.getWorld() != null && energy==0 && saveMeCount>0){
+            saveMeCount--;
+        }
+        if(energy==0 && saveMeCount==0 && this.getWorld() != null){
+            getWorld().addObject (new DeadBody(), getX(), getY());
+            getWorld().removeObject(this);
+            saveMeCount = 600;
+        }
     }
 
     /**
@@ -88,12 +102,12 @@ public abstract class Pedestrian extends SuperSmoothMover
     
     public void addedToWorld (World w)
     {
-        if (VehicleWorld.SHOW_ENERGY_BARS) 
+        if (isPeople && VehicleWorld.SHOW_ENERGY_BARS) 
         {
             w.addObject (energyBar, getX(), getY());
             energyBar.update(energy);
         }
-        if (VehicleWorld.SHOW_MONEY_BARS) 
+        if (isPeople && VehicleWorld.SHOW_MONEY_BARS) 
         {
             w.addObject (moneyBar, getX(), getY());
             moneyBar.update(money);
@@ -133,6 +147,10 @@ public abstract class Pedestrian extends SuperSmoothMover
         energy = x;
     }
     
+    public void setMoney(){
+        money -= 500;
+    }
+    
     public int getEnergy(){
         return energy;
     }
@@ -150,4 +168,15 @@ public abstract class Pedestrian extends SuperSmoothMover
         robbed = true;
         return robbed;
     }
+    
+    public boolean getDirection(){
+        if(direction == 1){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    
+    
 }

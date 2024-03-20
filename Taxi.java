@@ -59,12 +59,6 @@ public class Taxi extends Vehicle
                 stop();
                 getWorld().removeObject(p);
                 numP++;
-                return true;
-            }
-            // 1/3 chance of hitting a person
-            else{
-                p.knockDown();
-                return true;
             }
         }
         return false;

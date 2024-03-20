@@ -29,7 +29,10 @@ public class Motorcycles extends Vehicle
      */
     public void act()
     {
-       super.act();
+        super.act();
+        if(this.getWorld() != null){
+            checkItemsOnRoad();
+        }
     }
 
     public boolean checkHitPedestrian () {
@@ -54,6 +57,14 @@ public class Motorcycles extends Vehicle
             rob = true;
         }
         return false;
+    }
+    
+    public void checkItemsOnRoad(){
+        Items x = (Items) getOneIntersectingObject(Items.class);
+        if(x != null){
+            rob = true;
+            getWorld().removeObject(x);
+        }
     }
     
     public boolean robbed(){

@@ -6,16 +6,11 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
  * @author (your name) 
  * @version (a version number or a date)
  */
-public class Bomb extends SuperSmoothMover
+public class Bomb extends Actor
 {
-    /**
-     * Act - do whatever the Bomb wants to do. This method is called whenever
-     * the 'Act' or 'Run' button gets pressed in the environment.
-     */
-    
     private boolean entering;
     private int destination;
-    private int exitCountdown;
+  
     private GreenfootImage explodeImage;
     
     public Bomb () {
@@ -23,13 +18,11 @@ public class Bomb extends SuperSmoothMover
         explodeImage = new GreenfootImage(300, 300);
         explodeImage.setColor(Color.ORANGE);
         explodeImage.fillOval (0, 0, 299, 299);
-        exitCountdown  = 60;
     }
     
     public void addedToWorld (World w){
-        destination = w.getHeight()/2;
+        destination = 451;
     }
-    
     
     public void act()
     {
@@ -41,11 +34,8 @@ public class Bomb extends SuperSmoothMover
                damageTouching();
            }
        } else {
-           damageTouching();
-           exitCountdown--;
-           if (exitCountdown <= 0){
+               //getWorld().addObject(new Explosion(300, 10), getX(), getY());
                getWorld().removeObject(this);
-           }
        }
     }
     
@@ -54,5 +44,4 @@ public class Bomb extends SuperSmoothMover
             getWorld().removeObject (v);
         }
     }
-
 }

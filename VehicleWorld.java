@@ -24,13 +24,14 @@ public class VehicleWorld extends World
     private GreenfootImage background;
 
     // Color Constants
-    public static Color GREY_BORDER = new Color (108, 108, 108);
-    public static Color GREY_STREET = new Color (88, 88, 88);
+    public static Color GREY_BORDER = new Color (108, 108, 108, 0);
+    public static Color GREY_STREET = new Color (88, 88, 88, 0);
     public static Color YELLOW_LINE = new Color (255, 216, 0);
 
     public static boolean SHOW_SPAWNERS = true;
     public static boolean SHOW_ENERGY_BARS = true;
     public static boolean SHOW_MONEY_BARS = true;
+    public static boolean SHOW_D_BARS = false;
     
     // Set Y Positions for Pedestrians to spawn
     public static final int TOP_SPAWN = 190; // Pedestrians who spawn on top
@@ -45,6 +46,8 @@ public class VehicleWorld extends World
     //Pedestrians constants 
     public static final int P_Max_HP = 3000;
     public static final int P_Max_Money = 3000;
+    
+    private int actCount;
 
     /**
      * Constructor for objects of class MyWorld.
@@ -80,6 +83,8 @@ public class VehicleWorld extends World
         spaceBetweenLanes = 6;
         splitAtCenter = true;
         twoWayTraffic = true;
+        
+        actCount = 1;
 
         // Init lane spawner objects 
         laneSpawners = new VehicleSpawner[laneCount];
@@ -92,10 +97,12 @@ public class VehicleWorld extends World
 
         setBackground (background);
         
-        setPaintOrder(Vehicle.class);
+        setPaintOrder(Smog.class, Explosion.class, Vehicle.class,Pedestrian.class);
+        
     }
 
     public void act () {
+        actCount++;
         spawn();
         zSort ((ArrayList<Actor>)(getObjects(Actor.class)), this);
     }
@@ -124,7 +131,6 @@ public class VehicleWorld extends World
             for (Motorcycles p : cars){
                 if (p.robbed() == true){
                     x = getLane(p.getY()+12);
-                    //
                     if (!laneSpawners[x].isTouchingVehicle()){
                         addObject(new PoliceCar(laneSpawners[x]), 0, 0);
                     }
@@ -165,6 +171,10 @@ public class VehicleWorld extends World
             } else {
                 addObject (new People (-1), xSpawnLocation, BOTTOM_SPAWN);
             }
+        }
+        
+        if (actCount % 800 == 0){
+            addObject (new Smog(), 512, 200);
         }
 
     }

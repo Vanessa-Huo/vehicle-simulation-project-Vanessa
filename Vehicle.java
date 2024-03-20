@@ -1,5 +1,6 @@
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 import java.util.ArrayList;
+import greenfoot.World;
 
 /**
  * This is the superclass for Vehicles.
@@ -16,6 +17,11 @@ public abstract class Vehicle extends SuperSmoothMover
     protected VehicleSpawner origin;
     protected int followingDistance;
     protected int myLaneNumber;
+    private static final int stopDuration = 120;
+    private int stopTime = 0;
+    
+    private int actsLeft = 150;
+    private GreenfootSound horn;
 
     protected abstract boolean checkHitPedestrian ();
 
@@ -41,6 +47,7 @@ public abstract class Vehicle extends SuperSmoothMover
         maxSpeed *= origin.getSpeedModifier();
         speed = maxSpeed;
         isNew = true;
+        horn = new GreenfootSound("horn.wav");
     }
 
     /**
@@ -63,13 +70,15 @@ public abstract class Vehicle extends SuperSmoothMover
      * - subclass' act() method can invoke super.act() to call this, as is demonstrated here.
      */
     public void act () {
-        drive(); 
-        if (!checkHitPedestrian()){
-            repelPedestrians();
-        }
-
-        if (checkEdge()){
-            getWorld().removeObject(this);
+        if(moving){
+            drive(); 
+            if (!checkHitPedestrian()){
+                repelPedestrians();
+            }
+    
+            if (checkEdge()){
+                getWorld().removeObject(this);
+            }
         }
     }
 
@@ -101,6 +110,10 @@ public abstract class Vehicle extends SuperSmoothMover
     public void repelPedestrians() {
         ArrayList<Pedestrian> pedsTouching = (ArrayList<Pedestrian>)getIntersectingObjects(Pedestrian.class);
         pushAwayFromObjects(pedsTouching, this.getImage().getHeight()/2);
+    }
+    
+    public void increaseSpeed (double delta){
+        maxSpeed += delta;
     }
 
     // The Repel Pedestrian Experiment (primary method) - Currently a work in Progress (Feb 2023)
@@ -149,6 +162,10 @@ public abstract class Vehicle extends SuperSmoothMover
         // Ahead is a generic vehicle - we don't knockDownknow what type BUT
         // since every Vehicle "promises" to have a getSpeed() method,
         // we can call that on any vehicle to find out it's speed
+        if(actsLeft>0){
+            actsLeft--;
+        }
+        
         Vehicle ahead = (Vehicle) getOneObjectAtOffset (direction * (int)(speed + getImage().getWidth()/2 + followingDistance), 0, Vehicle.class);
         double otherVehicleSpeed = -1;
         if (ahead != null && ahead.isMoving()) {
@@ -157,18 +174,32 @@ public abstract class Vehicle extends SuperSmoothMover
         else if(ahead != null && !ahead.isMoving()){
             otherVehicleSpeed = 0;
         }
+        
+        ahead = (Vehicle) getOneObjectAtOffset (direction * (int)(speed + getImage().getWidth()/2), 0, Vehicle.class);
+        if (ahead != null && ahead.isMoving()) {
+            setMoving();
+            ahead.setMoving();
+            getWorld().addObject (new Explosion(), getX(), getY());
+        }
 
         // Various things that may slow down driving speed 
         // You can ADD ELSE IF options to allow other 
         // factors to reduce driving speed.
-
         if (otherVehicleSpeed >= 0 && otherVehicleSpeed < maxSpeed){ // Vehicle ahead is slower?
             speed = otherVehicleSpeed;
-        }else {
-            speed = maxSpeed; // nothing impeding speed, so go max speed
+            checkLane();
         }
-
+        else {
+            if (this instanceof Car && isTouching(Smog.class)){
+                speed = 2.7;
+            }
+            else{
+                speed = maxSpeed; // nothing impeding speed, so go max speed
+            }
+        }
+        
         move (speed * direction);
+        
     }   
 
     /**
@@ -182,4 +213,78 @@ public abstract class Vehicle extends SuperSmoothMover
     public boolean isMoving(){
         return moving;
     }
+    
+    public void checkLane(){
+        int lane = myLaneNumber;
+        Vehicle ahead;
+        if(lane == 1 || lane == 2 || lane == 5 || lane == 6){
+            ahead = (Vehicle) getOneObjectAtOffset (direction * (int)(speed + getImage().getWidth()/2 + followingDistance), getImage().getHeight()+50, Vehicle.class);
+            if(ahead == null){
+                ahead = (Vehicle) getOneObjectAtOffset (direction * -(int)(speed + getImage().getWidth()/2 + followingDistance), getImage().getHeight()+50, Vehicle.class);
+                if(ahead == null){
+                    moveDown();
+                }
+            }
+            else if (ahead != null){
+                ahead = (Vehicle) getOneObjectAtOffset (direction * (int)(speed + getImage().getWidth()/2 + followingDistance), -(getImage().getHeight()+50), Vehicle.class);
+                if(ahead == null){
+                    ahead = (Vehicle) getOneObjectAtOffset (direction * -(int)(speed + getImage().getWidth()/2 + followingDistance), -(getImage().getHeight()+50), Vehicle.class);
+                    if(ahead == null){
+                        moveUp();
+                    }
+                }
+            }
+        }
+        else if(lane == 0 || lane == 4){
+            ahead = (Vehicle) getOneObjectAtOffset (direction * (int)(speed + getImage().getWidth()/2 + followingDistance), -(getImage().getHeight()+50), Vehicle.class);
+            if(ahead == null){
+                ahead = (Vehicle) getOneObjectAtOffset (direction * -(int)(speed + getImage().getWidth()/2 + followingDistance), -(getImage().getHeight()+50), Vehicle.class);
+                if(ahead == null){
+                    moveDown();
+                }
+            }
+        }
+        else if(lane == 3 || lane == 7){
+            ahead = (Vehicle) getOneObjectAtOffset (direction * (int)(speed + getImage().getWidth()/2 + followingDistance), getImage().getHeight()+50, Vehicle.class);
+            if(ahead == null){
+                ahead = (Vehicle) getOneObjectAtOffset (direction * -(int)(speed + getImage().getWidth()/2 + followingDistance), getImage().getHeight()+50, Vehicle.class);
+                if(ahead == null){
+                    moveUp();
+                }
+            }
+        }
+    }
+    
+    public void stopC(){
+        stopTime = stopDuration;
+        speed = 0;
+        moving = false;
+    }
+    
+    public void moveUp(){
+        if(actsLeft==0){
+            stopC();
+            setLocation(getX(),getY()-63);
+            actsLeft=150;
+            moving = true;
+        }else{
+            horn.play();
+        }
+    }
+    
+    public void moveDown(){
+        if(actsLeft==0){
+            stopC();
+            setLocation(getX(),getY()+63);
+            actsLeft=150;
+            moving = true;
+        }else{
+            horn.play();
+        }
+    }
+    
+    public void setMoving(){
+        moving = false;
+    }
+
 }
